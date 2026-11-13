@@ -41,17 +41,6 @@ class BirthdayApp {
     await this.loadData();
     this.startDigitalClock();
     
-    // Automatically dismiss splash screen after brief showcase
-    setTimeout(() => {
-      const splash = document.getElementById('app-splash-screen');
-      if (splash) {
-        splash.style.opacity = '0';
-        setTimeout(() => {
-          splash.style.display = 'none';
-        }, 700);
-      }
-    }, 1800);
-
     // Default selected person for Individual Lookup (choose one celebrating today or first person)
     const todayBday = this.evaluatedPeople.find(p => p.isToday);
     this.selectedPersonId = todayBday ? todayBday.id : (this.evaluatedPeople[0]?.id || null);
