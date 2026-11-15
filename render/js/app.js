@@ -80,6 +80,18 @@ class BirthdayApp {
   startDigitalClock() {
     const update = () => {
       const now = new Date();
+
+      // Check if calendar date rolled over while the page was kept open (e.g. at midnight)
+      const currentToday = this.dateEngine.getTodayComponents();
+      if (now.getDate() !== currentToday.day || (now.getMonth() + 1) !== currentToday.month || now.getFullYear() !== currentToday.year) {
+        this.dateEngine.setReferenceDate(now);
+        this.evaluateDataset();
+        if (this.currentView === 'home' || this.currentView === 'today' || this.currentView === 'upcoming' || this.currentView === 'calendar') {
+          this.render();
+          return;
+        }
+      }
+
       let hours = this.simulatedTime.active ? this.simulatedTime.hours : now.getHours();
       let minutes = this.simulatedTime.active ? this.simulatedTime.minutes : now.getMinutes();
       let seconds = this.simulatedTime.active ? this.simulatedTime.seconds : now.getSeconds();
@@ -104,12 +116,12 @@ class BirthdayApp {
 
       const dateEl = document.getElementById('live-clock-date');
       if (dateEl) {
-        dateEl.textContent = `13 ${MONTH_NAMES[10]} 2026`;
+        dateEl.textContent = `${now.getDate()} ${MONTH_NAMES[now.getMonth()]} ${now.getFullYear()}`;
       }
 
       const dayEl = document.getElementById('live-clock-day');
       if (dayEl) {
-        dayEl.textContent = 'FRIDAY';
+        dayEl.textContent = WEEKDAYS[now.getDay()].toUpperCase();
       }
     };
 
@@ -315,6 +327,8 @@ class BirthdayApp {
   // ==========================================
   renderHomeDashboard() {
     const today = this.dateEngine.getTodayComponents();
+    const formattedDate = `${today.day} ${MONTH_NAMES[today.month - 1]} ${today.year}`;
+    const formattedDay = (today.weekday || '').toUpperCase();
     const totalPeople = this.evaluatedPeople.length;
     const todayPeople = this.evaluatedPeople.filter(p => p.isToday);
     const thisWeekPeople = this.evaluatedPeople.filter(p => !p.isToday && p.daysRemaining <= 7);
@@ -342,9 +356,9 @@ class BirthdayApp {
         
         <!-- Live Clock -->
         <div class="digital-clock-card">
-          <div class="clock-time" id="live-clock-time">04<span class="clock-colon">:</span>00<span class="clock-colon">:</span>00 <span class="clock-ampm">PM</span></div>
-          <div class="clock-date" id="live-clock-date">13 November 2026</div>
-          <div class="clock-day" id="live-clock-day">Friday</div>
+          <div class="clock-time" id="live-clock-time">--<span class="clock-colon">:</span>--<span class="clock-colon">:</span>-- <span class="clock-ampm">--</span></div>
+          <div class="clock-date" id="live-clock-date">${formattedDate}</div>
+          <div class="clock-day" id="live-clock-day">${formattedDay}</div>
           <button id="toggle-4pm-preview" class="text-[10px] font-mono px-2 py-0.5 rounded-full border border-cyan-500/30 bg-cyan-500/10 text-cyan-300 hover:bg-cyan-500/20 mt-2 cursor-pointer transition-all">
             🕒 Preview: 4:00 PM Today
           </button>
